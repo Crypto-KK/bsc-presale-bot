@@ -91,6 +91,7 @@ async function initBot() {
         console.log(`购买数量: ${buyingBnbAmount} BNB`)
         console.log(`Gas limit: ${gasLimit}`);
         console.log(`Gas price: ${(gasPrice / 1000000000) + ' Gwei'}`);
+        console.log(`预计矿工费: 小于${(gasLimit * (gasPrice / 1000000000)) / 1000000000} BNB`)
         console.log("====================================================")
         if (parseFloat(buyingBnbAmount) > balance) {
             console.error("钱包余额不足，已自动退出")
