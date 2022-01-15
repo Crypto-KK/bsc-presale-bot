@@ -16,8 +16,15 @@ var node = process.env.node || 'https://bsc-dataseed.binance.org/';
 var chainId = 56;
 var gasLimit = process.env.gasLimit || 500000; // in gwei
 var gasPrice = process.env.gasPrice || 10; // in gwei
+gasPrice = gasPrice * 1000000000;
 var cronTime = '*/100 * * * * * *'; // every 10 milliseconds 每10毫秒
-var botInitialDelay = process.env.botInitialDelay || 5000; // 机器人延时启动毫秒
+
+var hours = process.env.hours || 0
+var mins = process.env.mins || 0
+var secs = process.env.secs || 5
+
+var delaySecs = parseInt(hours) * 3600 + parseInt(mins) * 60 + parseInt(secs) // 延迟的秒数
+var botInitialDelay = delaySecs * 1000; // 机器人延时启动毫秒
 
 const presaleContractAddress = process.env.presaleContractAddress // 预售地址
 const buyingBnbAmount = process.env.buyingBnbAmount // 购买的bnb数量
@@ -57,16 +64,17 @@ async function initBot() {
             addressesUsedToSendTransactions += ', ' + web3.eth.accounts.privateKeyToAccount(privateKeys[i]).address;
         }
     }
-
-    console.log('钱包地址: ' + addressesUsedToSendTransactions);
-    console.log("预售地址: " + presaleContractAddress)
-    gasPrice = gasPrice * 1000000000;
-    console.log('Gas limit: ' + gasLimit);
-    console.log('Gas price: ' + (gasPrice / 1000000000) + ' Gwei');
-    console.log('节点: ' + node);
+    console.log("====================================================")
+    console.log(`钱包地址: ${addressesUsedToSendTransactions}`);
+    console.log(`预售地址: ${presaleContractAddress}`)
+    console.log(`购买数量: ${buyingBnbAmount} BNB`)
+    console.log(`Gas limit: ${gasLimit}`);
+    console.log(`Gas price: ${(gasPrice / 1000000000) + ' Gwei'}`);
+    console.log("====================================================")
 
     if (botInitialDelay > 0) {
-        console.log((botInitialDelay / 1000) + '秒后启动预售机器人... ¯\\_(*o*)_/¯');
+        console.log(`${hours}小时${mins}分钟${secs}秒后启动机器人 (${botInitialDelay / 1000}秒)`)
+        console.log("等待中......")
     } else {
         console.log('启动成功... ¯\\_(*o*)_/¯');
     }
