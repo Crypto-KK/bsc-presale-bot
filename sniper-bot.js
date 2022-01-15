@@ -1,67 +1,41 @@
-#!/usr/bin/ nodejs
 const fs = require('fs');
 const Cronr = require('cronr');
 const Web3 = require('web3');
+const dotenv = require("dotenv")
+const projectData = require("./utils").projectData
 
-console.log('Welcome to Sniper bot!');
 
-const projectData = {
-    utils: {
-        createLog: function(content) {
-            if (createLogs) {
-                if (fs.existsSync(logsPath)) {
-                    content = '\r\n' + new Date().toUTCString() + ': ' + content;
-                    console.log(content);
-                }
-                fs.appendFile(logsPath, content, function (err) {
-                    if (err) throw err;
-                });
-            }
-        },
-        propertyExists: function(object, key) {
-            return object ? hasOwnProperty.call(object, key) : false;
-        }
-    }
-};
-
-// reading params
-var params = process.argv.slice(2);
-var args = {};
-for (var i = 0, len = params.length; i < len; i+=1) {
-    var key_value = params[i].split('=');
-    args[key_value[0]] = key_value[1];
+dotenv.config()
+var logsDir = __dirname + '/logs/';
+// 创建日志输出路径
+if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir);
 }
+// ======================== 读取配置 ========================
+var node = process.env.node || 'https://bsc-dataseed.binance.org/';
+var chainId = 56;
+var gasLimit = process.env.gasLimit || 500000; // in gwei
+var gasPrice = process.env.gasPrice || 10; // in gwei
+var cronTime = '*/100 * * * * * *'; // every 10 milliseconds 每10毫秒
+var botInitialDelay = process.env.botInitialDelay || 5000; // 机器人延时启动毫秒
 
-// ======================== DEFAULT CONFIG ========================
-var node = 'https://bsc-dataseed.binance.org/';
-var gasLimit = 500000; // in gwei
-var gasPrice = 10; // in gwei
-var createLogs = false;
-var cronTime = '*/100 * * * * * *'; // every 10 milliseconds
-var botInitialDelay = 10000;
-// ======================== /DEFAULT CONFIG ========================
+const presaleContractAddress = process.env.presaleContractAddress // 预售地址
+const buyingBnbAmount = process.env.buyingBnbAmount // 购买的bnb数量
+const senderPrivateKey = process.env.senderPrivateKey // 钱包私钥
+// ======================== 读取配置 ========================
 
 var web3 = new Web3(new Web3.providers.HttpProvider(node));
-var chainId = 56;
-var logsDir = __dirname + '/logs/';
-var logsPath = logsDir + 'sniper-bot-' + new Date().toDateString().slice(0,10) + '.txt';
 
-async function initBotLogic() {
-    console.log(args)
-    // ======================== REQUIRED PARAMETERS ========================
-    if (!projectData.utils.propertyExists(args, 'presaleContractAddress') || args.presaleContractAddress === '' || args.presaleContractAddress == null || args.presaleContractAddress.length !== 42 || await web3.eth.getCode(args.presaleContractAddress) === '0x') {
+
+async function initBot() {
+    if (presaleContractAddress === '' || presaleContractAddress == null || presaleContractAddress.length !== 42 || await web3.eth.getCode(presaleContractAddress) === '0x') {
         return console.error('Missing or wrong presaleContractAddress parameter. presaleContractAddress must be contract address.');
-    } else if (!projectData.utils.propertyExists(args, 'buyingBnbAmount') || args.buyingBnbAmount === '' || args.buyingBnbAmount == null) {
+    } else if (buyingBnbAmount === '' || buyingBnbAmount == null) {
         return console.error('Missing or wrong buyingBnbAmount parameter.');
-    } else if (!projectData.utils.propertyExists(args, 'senderPrivateKey') || args.senderPrivateKey === '' || args.senderPrivateKey == null) {
+    } else if (senderPrivateKey === '' || senderPrivateKey == null) {
         return console.error('Missing or wrong senderPrivateKey parameter.');
     }
 
-    var buyingBnbAmount = args.buyingBnbAmount;
-    var presaleContractAddress = args.presaleContractAddress;
-
-    // validate the private key or keys
-    var senderPrivateKey = args.senderPrivateKey;
     var privateKeys = [];
     if (senderPrivateKey.indexOf(',') > -1) {
         privateKeys = senderPrivateKey.split(',');
@@ -69,11 +43,11 @@ async function initBotLogic() {
         privateKeys.push(senderPrivateKey);
     }
 
-    var addressesUsedToSendTransactions = '';
+    var addressesUsedToSendTransactions = ''; // 钱包地址
     var firstIteration = true;
     for (var i = 0, len = privateKeys.length; i < len; i+=1) {
         if (privateKeys[i].length !== 66) {
-            return console.error('One or more of the private keys are invalid.');
+            return console.error('需要传入一个或多个钱包私钥，多个钱包私钥请使用,作为分隔符');
         }
 
         if (firstIteration) {
@@ -83,32 +57,18 @@ async function initBotLogic() {
             addressesUsedToSendTransactions += ', ' + web3.eth.accounts.privateKeyToAccount(privateKeys[i]).address;
         }
     }
-    // ======================== /REQUIRED PARAMETERS ========================
 
-    // ======================== CHANGING DEFAULT PARAMETERS IF THEY ARE PASSED ========================
-    console.log('Addresses used to send the transactions: ' + addressesUsedToSendTransactions);
-    gasLimit = (projectData.utils.propertyExists(args, 'gasLimit') && args.gasLimit !== '' && args.gasLimit != null && true) ? args.gasLimit : gasLimit;
+    console.log('钱包地址: ' + addressesUsedToSendTransactions);
+    console.log("预售地址: " + presaleContractAddress)
+    gasPrice = gasPrice * 1000000000;
     console.log('Gas limit: ' + gasLimit);
-    console.log('Node: ' + node);
-    gasPrice = (projectData.utils.propertyExists(args, 'gasPrice') && args.gasPrice !== '' && args.gasPrice != null && true) ? args.gasPrice * 1000000000 : gasPrice * 1000000000;
     console.log('Gas price: ' + (gasPrice / 1000000000) + ' Gwei');
-    createLogs = (projectData.utils.propertyExists(args, 'createLogs') && args.createLogs === 'true') ? true : createLogs;
-    console.log('Creating logs: ' + createLogs);
-    cronTime = (projectData.utils.propertyExists(args, 'cronTime') && args.cronTime !== '' && args.cronTime != null && true) ? args.cronTime : cronTime;
-    console.log('Cron time: ' + cronTime);
-    botInitialDelay = (projectData.utils.propertyExists(args, 'botInitialDelay') && args.botInitialDelay !== '' && args.botInitialDelay != null && true) ? args.botInitialDelay : botInitialDelay;
-    console.log('Bot initial delay: ' + botInitialDelay);
-    // ======================== /CHANGING DEFAULT PARAMETERS IF THEY ARE PASSED ========================
-
-    // if logs dir missing then create it
-    if (createLogs && !fs.existsSync(logsDir)) {
-        fs.mkdirSync(logsDir);
-    }
+    console.log('节点: ' + node);
 
     if (botInitialDelay > 0) {
-        console.log('Starting the Sniper bot in ' + (botInitialDelay / 1000) + ' seconds... ¯\\_(*o*)_/¯');
+        console.log((botInitialDelay / 1000) + '秒后启动预售机器人... ¯\\_(*o*)_/¯');
     } else {
-        console.log('Starting the Sniper bot now... ¯\\_(*o*)_/¯');
+        console.log('启动成功... ¯\\_(*o*)_/¯');
     }
 
     setTimeout(function () {
@@ -199,4 +159,4 @@ async function initBotLogic() {
         job.start();
     }, botInitialDelay);
 }
-initBotLogic();
+initBot();
