@@ -2,6 +2,8 @@ const fs = require('fs');
 const Cronr = require('cronr');
 const Web3 = require('web3');
 const dotenv = require("dotenv")
+const bip39 = require("bip39")
+const HdWallet = require("ethereum-hdwallet")
 const projectData = require("./utils").projectData
 
 
@@ -11,6 +13,7 @@ var logsDir = __dirname + '/logs/';
 if (!fs.existsSync(logsDir)) {
     fs.mkdirSync(logsDir);
 }
+
 // ======================== 读取配置 ========================
 var node = process.env.node || 'https://bsc-dataseed.binance.org/';
 var chainId = 56;
@@ -28,7 +31,20 @@ var botInitialDelay = delaySecs * 1000; // 机器人延时启动毫秒
 
 const presaleContractAddress = process.env.presaleContractAddress // 预售地址
 const buyingBnbAmount = process.env.buyingBnbAmount // 购买的bnb数量
-const senderPrivateKey = process.env.senderPrivateKey // 钱包私钥
+const mnemonic = process.env.mnemonic // 助记词
+let senderPrivateKey = "" // 私钥
+
+async function getPrivateKey(mnemonic) {
+    // 助记词转私钥
+    const seed = await bip39.mnemonicToSeed(mnemonic)
+    const hdwallet = HdWallet.fromSeed(seed)
+    const key = hdwallet.derive("m/44'/60'/0'/0/0")
+    return "0x" + key.getPrivateKey().toString("hex")
+}
+
+getPrivateKey(mnemonic).then(res => {
+    senderPrivateKey = res
+})
 // ======================== 读取配置 ========================
 
 var web3 = new Web3(new Web3.providers.HttpProvider(node));
