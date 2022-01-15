@@ -27,3 +27,13 @@ mins=0
 secs=5
 
 ```
+
+# 运行
+1.安装依赖
+`npm i --save`
+
+2.填写.env文件
+
+3.`node sniper-bot.js`
+
+
