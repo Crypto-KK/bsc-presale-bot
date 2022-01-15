@@ -33,7 +33,7 @@ for (var i = 0, len = params.length; i < len; i+=1) {
 }
 
 // ======================== DEFAULT CONFIG ========================
-var node = (projectData.utils.propertyExists(args, 'node') && args.node != '' && args.node != null && args.node != undefined) ? args.node : 'https://bsc-dataseed.binance.org/';
+var node = 'https://bsc-dataseed.binance.org/';
 var gasLimit = 500000; // in gwei
 var gasPrice = 10; // in gwei
 var createLogs = false;
@@ -44,15 +44,16 @@ var botInitialDelay = 10000;
 var web3 = new Web3(new Web3.providers.HttpProvider(node));
 var chainId = 56;
 var logsDir = __dirname + '/logs/';
-var logsPath = logsDir + 'sniper-bot-' + new Date().toISOString().slice(0,10) + '.txt';
+var logsPath = logsDir + 'sniper-bot-' + new Date().toDateString().slice(0,10) + '.txt';
 
 async function initBotLogic() {
+    console.log(args)
     // ======================== REQUIRED PARAMETERS ========================
-    if (!projectData.utils.propertyExists(args, 'presaleContractAddress') || args.presaleContractAddress == '' || args.presaleContractAddress == null || args.presaleContractAddress == undefined || args.presaleContractAddress.length != 42 || await web3.eth.getCode(args.presaleContractAddress) == '0x') {
+    if (!projectData.utils.propertyExists(args, 'presaleContractAddress') || args.presaleContractAddress === '' || args.presaleContractAddress == null || args.presaleContractAddress.length !== 42 || await web3.eth.getCode(args.presaleContractAddress) === '0x') {
         return console.error('Missing or wrong presaleContractAddress parameter. presaleContractAddress must be contract address.');
-    } else if (!projectData.utils.propertyExists(args, 'buyingBnbAmount') || args.buyingBnbAmount == '' || args.buyingBnbAmount == null || args.buyingBnbAmount == undefined) {
+    } else if (!projectData.utils.propertyExists(args, 'buyingBnbAmount') || args.buyingBnbAmount === '' || args.buyingBnbAmount == null) {
         return console.error('Missing or wrong buyingBnbAmount parameter.');
-    } else if (!projectData.utils.propertyExists(args, 'senderPrivateKey') || args.senderPrivateKey == '' || args.senderPrivateKey == null || args.senderPrivateKey == undefined) {
+    } else if (!projectData.utils.propertyExists(args, 'senderPrivateKey') || args.senderPrivateKey === '' || args.senderPrivateKey == null) {
         return console.error('Missing or wrong senderPrivateKey parameter.');
     }
 
@@ -71,7 +72,7 @@ async function initBotLogic() {
     var addressesUsedToSendTransactions = '';
     var firstIteration = true;
     for (var i = 0, len = privateKeys.length; i < len; i+=1) {
-        if (privateKeys[i].length != 66) {
+        if (privateKeys[i].length !== 66) {
             return console.error('One or more of the private keys are invalid.');
         }
 
@@ -86,16 +87,16 @@ async function initBotLogic() {
 
     // ======================== CHANGING DEFAULT PARAMETERS IF THEY ARE PASSED ========================
     console.log('Addresses used to send the transactions: ' + addressesUsedToSendTransactions);
-    gasLimit = (projectData.utils.propertyExists(args, 'gasLimit') && args.gasLimit != '' && args.gasLimit != null && args.gasLimit != undefined) ? args.gasLimit : gasLimit;
+    gasLimit = (projectData.utils.propertyExists(args, 'gasLimit') && args.gasLimit !== '' && args.gasLimit != null && true) ? args.gasLimit : gasLimit;
     console.log('Gas limit: ' + gasLimit);
     console.log('Node: ' + node);
-    gasPrice = (projectData.utils.propertyExists(args, 'gasPrice') && args.gasPrice != '' && args.gasPrice != null && args.gasPrice != undefined) ? args.gasPrice * 1000000000 : gasPrice * 1000000000;
+    gasPrice = (projectData.utils.propertyExists(args, 'gasPrice') && args.gasPrice !== '' && args.gasPrice != null && true) ? args.gasPrice * 1000000000 : gasPrice * 1000000000;
     console.log('Gas price: ' + (gasPrice / 1000000000) + ' Gwei');
     createLogs = (projectData.utils.propertyExists(args, 'createLogs') && args.createLogs === 'true') ? true : createLogs;
     console.log('Creating logs: ' + createLogs);
-    cronTime = (projectData.utils.propertyExists(args, 'cronTime') && args.cronTime != '' && args.cronTime != null && args.cronTime != undefined) ? args.cronTime : cronTime;
+    cronTime = (projectData.utils.propertyExists(args, 'cronTime') && args.cronTime !== '' && args.cronTime != null && true) ? args.cronTime : cronTime;
     console.log('Cron time: ' + cronTime);
-    botInitialDelay = (projectData.utils.propertyExists(args, 'botInitialDelay') && args.botInitialDelay != '' && args.botInitialDelay != null && args.botInitialDelay != undefined) ? args.botInitialDelay : botInitialDelay;
+    botInitialDelay = (projectData.utils.propertyExists(args, 'botInitialDelay') && args.botInitialDelay !== '' && args.botInitialDelay != null && true) ? args.botInitialDelay : botInitialDelay;
     console.log('Bot initial delay: ' + botInitialDelay);
     // ======================== /CHANGING DEFAULT PARAMETERS IF THEY ARE PASSED ========================
 
@@ -113,7 +114,7 @@ async function initBotLogic() {
     setTimeout(function () {
         var executeBuy = true;
         const job = new Cronr(cronTime, function() {
-            projectData.utils.createLog('Cronjob iteration.');
+            // projectData.utils.createLog('Cronjob iteration.');
             if (executeBuy) {
                 executeBuy = false;
 
@@ -139,8 +140,8 @@ async function initBotLogic() {
                                 if (!signTransactionErr) {
                                     web3.eth.sendSignedTransaction(signedTx.rawTransaction, function (sendSignedTransactionErr, transactionHash) {
                                         if (!sendSignedTransactionErr) {
-                                            if (counter == privateKeys.length - 1) {
-                                                if (privateKeys.length == 1) {
+                                            if (counter === privateKeys.length - 1) {
+                                                if (privateKeys.length === 1) {
                                                     projectData.utils.createLog('Completed first and only transaction. Transaction hash: ' + transactionHash);
                                                 } else {
                                                     projectData.utils.createLog('Completed last transaction. Transaction hash: ' + transactionHash);
@@ -158,7 +159,7 @@ async function initBotLogic() {
                                                 projectData.utils.createLog('Method web3.eth.sendSignedTransaction failed, most likely signed with low gas limit.. Message: ' + sendSignedTransactionErr.toString());
                                             }
 
-                                            if (counter != privateKeys.length - 1) {
+                                            if (counter !== privateKeys.length - 1) {
                                                 counter+=1;
                                                 return recursiveTransactionsLoop(counter);
                                             }
@@ -172,7 +173,7 @@ async function initBotLogic() {
                                         projectData.utils.createLog('Method web3.eth.accounts.signTransaction failed, most likely signed with low gas limit. Message: ' + signTransactionErr.toString());
                                     }
 
-                                    if (counter != privateKeys.length - 1) {
+                                    if (counter !== privateKeys.length - 1) {
                                         counter+=1;
                                         return recursiveTransactionsLoop(counter);
                                     }
@@ -186,7 +187,7 @@ async function initBotLogic() {
                                 projectData.utils.createLog('Presale contract is not active yet, method web3.eth.estimateGas() failed. Error message: ' + gasEstimateError.toString());
                             }
 
-                            if (counter != privateKeys.length - 1) {
+                            if (counter !== privateKeys.length - 1) {
                                 counter+=1;
                                 return recursiveTransactionsLoop(counter);
                             }
