@@ -37,3 +37,19 @@ secs=5
 3.`node sniper-bot.js`
 
 
+# 运行日志示例
+```
+1小时0分钟0秒后启动机器人 (3600秒)
+等待中......
+====================================================
+预售地址: 0x52E6d71D05CCc2061FabB3F060a6fCCA********
+钱包地址: 0x975D64ef890E3e6DB1Dc9434A1C19e3c********
+钱包余额：17.205405487549468 BNB
+购买数量: 3 BNB
+Gas limit: 500000
+Gas price: 100 Gwei
+预计矿工费: 小于0.05 BNB
+====================================================
+
+11:08:45 PM: Presale contract is not active yet, method web3.eth.estimateGas() failed. Error message: Returned error: execution reverted: It is not time to buy
+```
