@@ -80,13 +80,24 @@ async function initBot() {
             addressesUsedToSendTransactions += ', ' + web3.eth.accounts.privateKeyToAccount(privateKeys[i]).address;
         }
     }
-    console.log("====================================================")
-    console.log(`钱包地址: ${addressesUsedToSendTransactions}`);
-    console.log(`预售地址: ${presaleContractAddress}`)
-    console.log(`购买数量: ${buyingBnbAmount} BNB`)
-    console.log(`Gas limit: ${gasLimit}`);
-    console.log(`Gas price: ${(gasPrice / 1000000000) + ' Gwei'}`);
-    console.log("====================================================")
+
+    var senderAddress = web3.eth.accounts.privateKeyToAccount(privateKeys[0]).address;
+    web3.eth.getBalance(senderAddress).then(r => {
+        const balance = r / 1000000000000000000
+        console.log("====================================================")
+        console.log(`预售地址: ${presaleContractAddress}`)
+        console.log(`钱包地址: ${addressesUsedToSendTransactions}`);
+        console.log(`钱包余额：${balance} BNB`)
+        console.log(`购买数量: ${buyingBnbAmount} BNB`)
+        console.log(`Gas limit: ${gasLimit}`);
+        console.log(`Gas price: ${(gasPrice / 1000000000) + ' Gwei'}`);
+        console.log("====================================================")
+        if (parseFloat(buyingBnbAmount) > balance) {
+            console.error("钱包余额不足，已自动退出")
+            process.exit()
+        }
+    })
+
 
     if (botInitialDelay > 0) {
         console.log(`${hours}小时${mins}分钟${secs}秒后启动机器人 (${botInitialDelay / 1000}秒)`)
@@ -94,6 +105,7 @@ async function initBot() {
     } else {
         console.log('启动成功... ¯\\_(*o*)_/¯');
     }
+
 
     setTimeout(function () {
         var executeBuy = true;
