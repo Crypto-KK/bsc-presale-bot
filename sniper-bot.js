@@ -2,8 +2,7 @@ const fs = require('fs');
 const Cronr = require('cronr');
 const Web3 = require('web3');
 const dotenv = require("dotenv")
-const bip39 = require("bip39")
-const HdWallet = require("ethereum-hdwallet")
+
 const projectData = require("./utils").projectData
 
 
@@ -31,20 +30,20 @@ var botInitialDelay = delaySecs * 1000; // 机器人延时启动毫秒
 
 const presaleContractAddress = process.env.presaleContractAddress // 预售地址
 const buyingBnbAmount = process.env.buyingBnbAmount // 购买的bnb数量
-const mnemonic = process.env.mnemonic // 助记词
-let senderPrivateKey = "" // 私钥
 
-async function getPrivateKey(mnemonic) {
-    // 助记词转私钥
-    const seed = await bip39.mnemonicToSeed(mnemonic)
-    const hdwallet = HdWallet.fromSeed(seed)
-    const key = hdwallet.derive("m/44'/60'/0'/0/0")
-    return "0x" + key.getPrivateKey().toString("hex")
+const mnemonic = process.env.mnemonic || "" // 助记词
+let senderPrivateKey = process.env.senderPrivateKey || "" // 私钥
+
+
+if (mnemonic) {
+    console.log("检测到使用助记词方式导入钱包")
+    projectData.utils.getPrivateKey(mnemonic).then(res => {
+        senderPrivateKey = res
+    })
+} else {
+    console.log("检测到使用私钥方式导入钱包")
 }
 
-getPrivateKey(mnemonic).then(res => {
-    senderPrivateKey = res
-})
 // ======================== 读取配置 ========================
 
 var web3 = new Web3(new Web3.providers.HttpProvider(node));
@@ -91,7 +90,7 @@ async function initBot() {
         console.log(`购买数量: ${buyingBnbAmount} BNB`)
         console.log(`Gas limit: ${gasLimit}`);
         console.log(`Gas price: ${(gasPrice / 1000000000) + ' Gwei'}`);
-        console.log(`预计矿工费: 小于${(gasLimit * (gasPrice / 1000000000)) / 1000000000} BNB`)
+        console.log(`矿工费: <= ${(gasLimit * (gasPrice / 1000000000)) / 1000000000} BNB`)
         console.log("====================================================")
         if (parseFloat(buyingBnbAmount) > balance) {
             console.error("钱包余额不足，已自动退出")
