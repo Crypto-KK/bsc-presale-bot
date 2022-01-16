@@ -2,6 +2,7 @@ const fs = require('fs');
 const Cronr = require('cronr');
 const Web3 = require('web3');
 const dotenv = require("dotenv")
+const chalk = require("chalk")
 
 const projectData = require("./utils").projectData
 
@@ -36,12 +37,12 @@ let senderPrivateKey = process.env.senderPrivateKey || "" // 私钥
 
 
 if (mnemonic) {
-    console.log("检测到使用助记词方式导入钱包")
+    console.log(chalk.blue("检测到使用助记词方式导入钱包"))
     projectData.utils.getPrivateKey(mnemonic).then(res => {
         senderPrivateKey = res
     })
 } else {
-    console.log("检测到使用私钥方式导入钱包")
+    console.log(chalk.blue("检测到使用私钥方式导入钱包"))
 }
 
 // ======================== 读取配置 ========================
@@ -51,11 +52,11 @@ var web3 = new Web3(new Web3.providers.HttpProvider(node));
 
 async function initBot() {
     if (presaleContractAddress === '' || presaleContractAddress == null || presaleContractAddress.length !== 42 || await web3.eth.getCode(presaleContractAddress) === '0x') {
-        return console.error('Missing or wrong presaleContractAddress parameter. presaleContractAddress must be contract address.');
+        return console.error('预售地址没填写或填写错误，预售地址必须是合约地址');
     } else if (buyingBnbAmount === '' || buyingBnbAmount == null) {
-        return console.error('Missing or wrong buyingBnbAmount parameter.');
+        return console.error('购买BNB的数量填写错误');
     } else if (senderPrivateKey === '' || senderPrivateKey == null) {
-        return console.error('Missing or wrong senderPrivateKey parameter.');
+        return console.error('私钥填写错误');
     }
 
     var privateKeys = [];
@@ -84,16 +85,16 @@ async function initBot() {
     web3.eth.getBalance(senderAddress).then(r => {
         const balance = r / 1000000000000000000
         console.log("====================================================")
-        console.log(`预售地址: ${presaleContractAddress}`)
-        console.log(`钱包地址: ${addressesUsedToSendTransactions}`);
-        console.log(`钱包余额：${balance} BNB`)
-        console.log(`购买数量: ${buyingBnbAmount} BNB`)
+        console.log(`预售地址:`, chalk.green(presaleContractAddress))
+        console.log(`钱包地址:`, chalk.green(addressesUsedToSendTransactions));
+        console.log(`钱包余额:`, chalk.green(`${balance} BNB`))
+        console.log(`购买数量:`, chalk.green(`${buyingBnbAmount} BNB`))
         console.log(`Gas limit: ${gasLimit}`);
         console.log(`Gas price: ${(gasPrice / 1000000000) + ' Gwei'}`);
         console.log(`矿工费: <= ${(gasLimit * (gasPrice / 1000000000)) / 1000000000} BNB`)
         console.log("====================================================")
         if (parseFloat(buyingBnbAmount) > balance) {
-            console.error("钱包余额不足，已自动退出")
+            console.log(chalk.red("钱包余额不足，已自动退出"))
             process.exit()
         }
     })
