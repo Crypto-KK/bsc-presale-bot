@@ -139,9 +139,9 @@ async function initBot() {
                                         if (!sendSignedTransactionErr) {
                                             if (counter === privateKeys.length - 1) {
                                                 if (privateKeys.length === 1) {
-                                                    projectData.utils.createLog('Completed first and only transaction. Transaction hash: ' + transactionHash);
+                                                    projectData.utils.createLog(`first and only transaction sent success. Transaction hash: ${transactionHash}. https://www.bscscan.com/tx/${transactionHash}`);
                                                 } else {
-                                                    projectData.utils.createLog('Completed last transaction. Transaction hash: ' + transactionHash);
+                                                    projectData.utils.createLog(`Completed last transaction. Transaction hash: ${transactionHash}. https://www.bscscan.com/tx/${transactionHash}`);
                                                 }
                                             } else {
                                                 projectData.utils.createLog('Completed transaction. Transaction hash: ' + transactionHash);
@@ -161,7 +161,14 @@ async function initBot() {
                                                 return recursiveTransactionsLoop(counter);
                                             }
                                         }
-                                    });
+                                    })
+                                        .on("receipt", () => {
+                                            console.log(chalk.green(`Transaction confirmed.`))
+                                        })
+                                        .on("error", (err) => {
+                                            console.log("Error during transaction execution. Details will follow.")
+                                            console.log(err)
+                                        })
                                 } else {
                                     executeBuy = true;
                                     if (signTransactionErr.message) {
