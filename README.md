@@ -10,26 +10,25 @@
 
 # .env配置
 ```
-# 预售地址(注意不是Token合约地址)
-presaleContractAddress=0xxxxxxx
-
-# 节点(默认bsc主节点)
+# 节点 默认BSC主网 测试网：https://data-seed-prebsc-1-s1.binance.org:8545
 node=https://bsc-dataseed.binance.org/
-
+# 预售地址(复制PinkSale或DxSale的预售地址，注意不是Token合约地址)
+presaleContractAddress=0xA926e7C0F6afA20569f7425bB3E93017C813****
 # 购买bnb数量
-buyingBnbAmount=0.1
+buyingBnbAmount=2
 
-# 钱包助记词(12个单词) 使用空格隔开
-mnemonic="airport best ..."
+# 助记词和私钥二选一，助记词优先级高于私钥，若助记词为空，则读取私钥。私钥支持多个钱包，使用英文逗号隔开，助记词暂时不支持多个钱包
+# 助记词
+mnemonic="civil planet ......"
+# 私钥(支持多个私钥，使用英文逗号隔开)
+senderPrivateKey=
 
-# gas价格，建议设置7-100
+# 热度高的项目建议使用200-2000
 gasPrice=25
-
-# 根据时分秒设定倒计时延迟启动机器人(用于挂机自动抢购)
+# 机器人延时启动
 hours=0
 mins=0
-secs=5
-
+secs=0
 ```
 
 # 运行
