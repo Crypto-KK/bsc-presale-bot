@@ -15,6 +15,10 @@ const projectData = {
                 if (err) throw err;
             });
         },
+        consoleLog: function (content) {
+            content = '\r\n' + new Date().toLocaleTimeString() + ': ' + content;
+            console.log(content);
+        },
         propertyExists: function(object, key) {
             return object ? hasOwnProperty.call(object, key) : false;
         },

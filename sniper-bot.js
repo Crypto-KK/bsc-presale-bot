@@ -1,4 +1,4 @@
-const fs = require('fs');
+// const fs = require('fs');
 const Cronr = require('cronr');
 const Web3 = require('web3');
 const dotenv = require("dotenv")
@@ -8,11 +8,11 @@ const projectData = require("./utils").projectData
 
 
 dotenv.config()
-var logsDir = __dirname + '/logs/';
-// 创建日志输出路径
-if (!fs.existsSync(logsDir)) {
-    fs.mkdirSync(logsDir);
-}
+// var logsDir = __dirname + '/logs/';
+// // 创建日志输出路径
+// if (!fs.existsSync(logsDir)) {
+//     fs.mkdirSync(logsDir);
+// }
 
 // ======================== 读取配置 ========================
 var node = process.env.node || 'https://bsc-dataseed.binance.org/';
@@ -91,7 +91,7 @@ async function initBot() {
         console.log(`购买数量:`, chalk.green(`${buyingBnbAmount} BNB`))
         console.log(`Gas limit: ${gasLimit}`);
         console.log(`Gas price: ${(gasPrice / 1000000000) + ' Gwei'}`);
-        console.log(`矿工费: <= ${(gasLimit * (gasPrice / 1000000000)) / 1000000000} BNB`)
+        console.log(`矿工费: < ${(gasLimit * (gasPrice / 1000000000)) / 1000000000} BNB (Gax used x Gas price)`)
         console.log("====================================================")
         if (parseFloat(buyingBnbAmount) > balance) {
             console.log(chalk.red("钱包余额不足，已自动退出"))
@@ -111,7 +111,7 @@ async function initBot() {
     setTimeout(function () {
         var executeBuy = true;
         const job = new Cronr(cronTime, function() {
-            // projectData.utils.createLog('Cronjob iteration.');
+            // projectData.utils.consoleLog('Cronjob iteration.');
             if (executeBuy) {
                 executeBuy = false;
 
@@ -123,7 +123,7 @@ async function initBot() {
 
                     web3.eth.estimateGas({to: presaleContractAddress, from: senderAddress, value: web3.utils.toHex(web3.utils.toWei(buyingBnbAmount, 'ether'))}, function(gasEstimateError, gasAmount) {
                         if (!gasEstimateError) {
-                            projectData.utils.createLog('Transaction estimation successful: ' + gasAmount);
+                            projectData.utils.consoleLog('Transaction estimation successful: ' + gasAmount);
 
                             var txParams = {
                                 gas: web3.utils.toHex(gasLimit),
@@ -139,21 +139,21 @@ async function initBot() {
                                         if (!sendSignedTransactionErr) {
                                             if (counter === privateKeys.length - 1) {
                                                 if (privateKeys.length === 1) {
-                                                    projectData.utils.createLog(`first and only transaction sent success. Transaction hash: ${transactionHash}. https://www.bscscan.com/tx/${transactionHash}`);
+                                                    projectData.utils.consoleLog(`first and only transaction sent success. Transaction hash: ${transactionHash}. https://www.bscscan.com/tx/${transactionHash}`);
                                                 } else {
-                                                    projectData.utils.createLog(`Completed last transaction. Transaction hash: ${transactionHash}. https://www.bscscan.com/tx/${transactionHash}`);
+                                                    projectData.utils.consoleLog(`Completed last transaction. Transaction hash: ${transactionHash}. https://www.bscscan.com/tx/${transactionHash}`);
                                                 }
                                             } else {
-                                                projectData.utils.createLog('Completed transaction. Transaction hash: ' + transactionHash);
+                                                projectData.utils.consoleLog('Completed transaction. Transaction hash: ' + transactionHash);
                                                 counter+=1;
                                                 return recursiveTransactionsLoop(counter);
                                             }
                                         } else {
                                             executeBuy = true;
                                             if (sendSignedTransactionErr.message) {
-                                                projectData.utils.createLog('Method web3.eth.sendSignedTransaction failed, most likely signed with low gas limit.. Message: ' + sendSignedTransactionErr.message);
+                                                projectData.utils.consoleLog('Method web3.eth.sendSignedTransaction failed, most likely signed with low gas limit.. Message: ' + sendSignedTransactionErr.message);
                                             } else {
-                                                projectData.utils.createLog('Method web3.eth.sendSignedTransaction failed, most likely signed with low gas limit.. Message: ' + sendSignedTransactionErr.toString());
+                                                projectData.utils.consoleLog('Method web3.eth.sendSignedTransaction failed, most likely signed with low gas limit.. Message: ' + sendSignedTransactionErr.toString());
                                             }
 
                                             if (counter !== privateKeys.length - 1) {
@@ -172,9 +172,9 @@ async function initBot() {
                                 } else {
                                     executeBuy = true;
                                     if (signTransactionErr.message) {
-                                        projectData.utils.createLog('Method web3.eth.accounts.signTransaction failed, most likely signed with low gas limit. Message: ' + signTransactionErr.message);
+                                        projectData.utils.consoleLog('Method web3.eth.accounts.signTransaction failed, most likely signed with low gas limit. Message: ' + signTransactionErr.message);
                                     } else {
-                                        projectData.utils.createLog('Method web3.eth.accounts.signTransaction failed, most likely signed with low gas limit. Message: ' + signTransactionErr.toString());
+                                        projectData.utils.consoleLog('Method web3.eth.accounts.signTransaction failed, most likely signed with low gas limit. Message: ' + signTransactionErr.toString());
                                     }
 
                                     if (counter !== privateKeys.length - 1) {
@@ -186,9 +186,9 @@ async function initBot() {
                         } else {
                             executeBuy = true;
                             if (gasEstimateError.message) {
-                                projectData.utils.createLog('Presale contract is not active yet, method web3.eth.estimateGas() failed. Error message: ' + gasEstimateError.message);
+                                projectData.utils.consoleLog('Presale contract is not active yet, method web3.eth.estimateGas() failed. Error message: ' + gasEstimateError.message);
                             } else {
-                                projectData.utils.createLog('Presale contract is not active yet, method web3.eth.estimateGas() failed. Error message: ' + gasEstimateError.toString());
+                                projectData.utils.consoleLog('Presale contract is not active yet, method web3.eth.estimateGas() failed. Error message: ' + gasEstimateError.toString());
                             }
 
                             if (counter !== privateKeys.length - 1) {
