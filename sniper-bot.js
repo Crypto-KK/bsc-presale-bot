@@ -15,7 +15,7 @@ if (!fs.existsSync(logsDir)) {
 }
 
 // ======================== 读取配置 ========================
-var node = 'https://bsc-dataseed.binance.org/';
+var node = process.env.node || 'https://bsc-dataseed.binance.org/';
 var chainId = 56;
 var gasLimit = process.env.gasLimit || 500000; // in gwei
 var gasPrice = process.env.gasPrice || 10; // in gwei
