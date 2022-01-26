@@ -2,8 +2,9 @@
 币安智能链预售抢购机器人,支持pinksale、dxsale
 
 # 注意事项：
-当前只支持RPC节点订阅，还不支持WS
+当前只支持HTTP节点订阅，不支持WSS
 抢购过程中会有几秒延迟，通常在4-9秒才能确认交易，不支持0区块，在硬顶低且热度高的项目中会抢购失败
+建议购买或自行搭建BSC私有节点提高速度
 
 # 使用方法
 重命名`.env.example`文件为`.env`文件，并按照要求添加相应参数
@@ -51,7 +52,7 @@ secs=0
 购买数量: 3 BNB
 Gas limit: 500000
 Gas price: 100 Gwei
-预计矿工费: 小于0.05 BNB
+预计矿工费: 小于0.05 BNB (Gas used x Gas price)
 ====================================================
 
 11:00:00 PM: Presale contract is not active yet, method web3.eth.estimateGas() failed. Error message: Returned error: execution reverted: It is not time to buy
