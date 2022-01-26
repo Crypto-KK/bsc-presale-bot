@@ -1,6 +1,10 @@
 # bsc-presale-bot
 币安智能链预售抢购机器人,支持pinksale、dxsale
 
+# 注意事项：
+当前只支持RPC节点订阅，还不支持WS
+抢购过程中会有几秒延迟，通常在4-9秒才能确认交易，不支持0区块，在硬顶低且热度高的项目中会抢购失败
+
 # 使用方法
 重命名`.env.example`文件为`.env`文件，并按照要求添加相应参数
 
@@ -51,5 +55,8 @@ Gas price: 100 Gwei
 预计矿工费: 小于0.05 BNB
 ====================================================
 
-11:08:45 PM: Presale contract is not active yet, method web3.eth.estimateGas() failed. Error message: Returned error: execution reverted: It is not time to buy
+11:00:00 PM: Presale contract is not active yet, method web3.eth.estimateGas() failed. Error message: Returned error: execution reverted: It is not time to buy
+11:00:01 PM: Transaction estimation successful: 216559
+11:00:01 PM: first and only transaction sent success. Transaction hash: 0x****. https://www.bscscan.com/tx/0x****.
+11:00:05 PM: Transaction confirmed.
 ```
