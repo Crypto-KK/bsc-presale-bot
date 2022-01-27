@@ -16,7 +16,7 @@ const projectData = {
             });
         },
         consoleLog: function (content) {
-            content = '\r\n' + new Date().toLocaleTimeString() + ': ' + content;
+            content = '\r' + new Date().toLocaleTimeString() + ': ' + content;
             console.log(content);
         },
         propertyExists: function(object, key) {
